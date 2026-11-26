@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz Avatar: A Lenda de Aang</title>
+<style>
+:root{--b1:#0b3d6b;--b2:#1c7ed6;--ac:#a5f3fc}
+body[data-n=agua]{--b1:#0b3d6b;--b2:#1c7ed6;--ac:#a5f3fc}
+body[data-n=terra]{--b1:#243d1b;--b2:#6b8e23;--ac:#f1d27a}
+body[data-n=fogo]{--b1:#4a0d0d;--b2:#d9480f;--ac:#ffd43b}
+body[data-n=ar]{--b1:#47557f;--b2:#a7b6d8;--ac:#fff3bf}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:#fff;font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:linear-gradient(160deg,var(--b1),var(--b2)) fixed}
+h1,h2,h3{font-family:"Palatino Linotype",Palatino,Georgia,serif;margin:.3em 0}
+h1{font-size:2.4rem;text-align:center}
+[hidden]{display:none!important}
+#bg{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.p{position:absolute;opacity:0}
+#bg.agua .p{bottom:-40px;border-radius:50%;border:2px solid rgba(255,255,255,.65);animation:up linear infinite}
+#bg.fogo .p{bottom:-40px;border-radius:50%;background:radial-gradient(#ffd43b,#f76707 60%,transparent);animation:up ease-in infinite}
+#bg.terra .p{top:-40px;border-radius:0 80% 0 80%;background:#8ab34a;animation:down linear infinite}
+#bg.ar .p{left:-120px;background:rgba(255,255,255,.75);border-radius:2px;animation:side linear infinite}
+@keyframes up{0%{transform:translate(0,0);opacity:0}10%{opacity:.8}100%{transform:translate(30px,-115vh);opacity:0}}
+@keyframes down{0%{transform:translate(0,0) rotate(0);opacity:0}10%{opacity:.8}100%{transform:translate(40px,115vh) rotate(360deg);opacity:0}}
+@keyframes side{0%{transform:translateX(0);opacity:0}10%{opacity:.8}100%{transform:translateX(125vw);opacity:0}}
+@media(prefers-reduced-motion:reduce){.p{animation:none!important}}
+main{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:18px 16px 40px}
+.scr{display:none}.scr.on{display:block}
+.card{background:rgba(0,0,0,.3);border-radius:14px;padding:16px;margin:12px 0}
+.sub,.note{text-align:center;opacity:.9}
+.note{font-size:.9rem}
+input{width:100%;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,.4);background:rgba(0,0,0,.3);color:#fff;font:inherit}
+input:focus,button:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.nb{padding:12px 8px;border-radius:12px;border:2px solid rgba(255,255,255,.35);background:rgba(0,0,0,.25);color:#fff;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.nb span{font-size:1.8rem}.nb small{opacity:.85}
+.nb.sel{border-color:var(--ac);background:rgba(255,255,255,.2)}
+.btn{display:block;width:100%;margin:10px 0;padding:13px;border-radius:12px;border:0;background:var(--ac);color:#111;font:700 1rem system-ui,sans-serif;cursor:pointer}
+.btn.ghost{background:rgba(0,0,0,.3);color:#fff;border:2px solid rgba(255,255,255,.4);font-weight:500}
+.btn:disabled{opacity:.5}
+.top{display:flex;justify-content:space-between;font-weight:600}
+.bar{height:8px;background:rgba(0,0,0,.35);border-radius:6px;overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;width:0;background:var(--ac);transition:width .4s}
+.badge{font-size:.9rem;opacity:.95}
+.op{display:block;width:100%;text-align:left;margin:8px 0;padding:12px;border-radius:10px;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff;font:inherit;cursor:pointer}
+.op.ok{background:#2f9e44;border-color:#8ce99a}.op.no{background:#c92a2a;border-color:#ffa8a8}.op.off{opacity:.25}
+.fb{margin:8px 0;min-height:1.4em}
+.tabs{display:flex;gap:6px}
+.tab{flex:1;padding:10px 4px;border-radius:10px;border:2px solid rgba(255,255,255,.35);background:rgba(0,0,0,.25);color:#fff;font:inherit;font-size:.85rem;cursor:pointer}
+.tab.on{background:var(--ac);color:#111;border-color:var(--ac);font-weight:700}
+.row{display:flex;justify-content:space-between;gap:8px;padding:10px 12px;margin:6px 0;border-radius:10px;background:rgba(0,0,0,.3)}
+.row2{margin:10px 0;padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.3)}
+.big{font-size:3rem;text-align:center;margin:0}
+</style>
+</head>
+<body data-n="agua">
+<div id="bg"></div>
+<main>
+
+<section id="s0" class="scr on">
+  <h1>Quiz Avatar</h1>
+  <p class="sub" id="sb"></p>
+  <div class="card">
+    <label for="nm">Seu nome</label>
+    <input id="nm" maxlength="14" placeholder="Como devemos te chamar?" autocomplete="off">
+    <p>Escolha sua nação:</p>
+    <div class="grid" id="ng"></div>
+    <p id="pi" class="note">Cada nação tem um poder que pode ser usado uma vez por pergunta.</p>
+  </div>
+  <button class="btn" onclick="start()">Começar o quiz</button>
+  <button class="btn ghost" onclick="showRank()">Ver ranking</button>
+</section>
+
+<section id="s1" class="scr">
+  <div class="top"><span id="pg"></span><span id="sc"></span></div>
+  <div class="bar"><i id="bf"></i></div>
+  <div class="card">
+    <div id="bd" class="badge"></div>
+    <h2 id="qt"></h2>
+    <div id="op"></div>
+    <button id="pw" class="btn ghost" onclick="power()"></button>
+    <div id="fb" class="fb" aria-live="polite"></div>
+    <button id="nx" class="btn" onclick="next()" hidden>Próxima pergunta</button>
+  </div>
+</section>
+
+<section id="s2" class="scr">
+  <div class="card">
+    <p class="big" id="rl"></p>
+    <h2 id="rt" style="text-align:center"></h2>
+    <p id="rd" class="sub"></p>
+  </div>
+  <button class="btn" onclick="again()">Jogar de novo</button>
+  <button class="btn ghost" onclick="showRank()">Ver ranking</button>
+</section>
+
+<section id="s3" class="scr">
+  <h2>Ranking</h2>
+  <div class="tabs">
+    <button class="tab" data-t="g" onclick="showRank('g')">Geral</button>
+    <button class="tab" data-t="n" onclick="showRank('n')">Por nação</button>
+    <button class="tab" data-t="d" onclick="showRank('d')">Nação x nação</button>
+  </div>
+  <div id="rk"></div>
+  <p class="note">O ranking fica salvo neste aparelho. Passe o celular para outro jogador e compitam.</p>
+  <button class="btn" onclick="again()">Jogar</button>
+  <button class="btn ghost" onclick="clearRank()">Apagar ranking</button>
+</section>
+
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+
+const NAT={
+ agua:{n:'Água',e:'💧',g:'Katara',pw:'Cura',pd:'se errar, você tenta de novo.',r:'Isso! Você acertou com calma.',w:'Não foi dessa vez, mas você aprende rápido.'},
+ terra:{n:'Terra',e:'🪨',g:'Toph',pw:'Visão sísmica',pd:'elimina 2 alternativas erradas.',r:'Fácil. Eu senti a resposta daqui.',w:'Errou! Sinta mais o chão da próxima.'},
+ fogo:{n:'Fogo',e:'🔥',g:'Zuko',pw:'Fogo duplo',pd:'esta pergunta vale o dobro.',r:'Hmpf. Nada mal.',w:'Droga! Mas a honra se recupera.'},
+ ar:{n:'Ar',e:'🌪️',g:'Aang',pw:'Planar',pd:'pula a pergunta sem perder pontos.',r:'Uhuu! Mandou bem!',w:'Tudo bem, cada erro ensina algo.'}
+};
+
+// [pergunta, nação, nível (f/m/d), [correta, erradas...], curiosidade]
+const Q=[
+// fáceis
+['Qual é o nome do bisão voador de Aang?','ar','f',['Appa','Momo','Hei Bai','Bumi'],'Appa é um bisão voador de seis patas.'],
+['Qual é o nome do lêmure voador do grupo?','ar','f',['Momo','Appa','Hei Bai','Bumi'],'Aang encontrou Momo no Templo do Ar do Sul.'],
+['Por quantos anos Aang ficou congelado no iceberg?','ar','f',['100 anos','50 anos','200 anos','10 anos'],'Katara e Sokka o libertaram do gelo.'],
+['De qual tribo Katara e Sokka fazem parte?','agua','f',['Tribo da Água do Sul','Tribo da Água do Norte','Reino da Terra','Nômades do Ar'],'No Polo Sul quase não restavam dobradores de água.'],
+['Qual é a grande cidade murada do Reino da Terra?','terra','f',['Ba Sing Se','Omashu','Gaoling','Ilha Kyoshi'],'Ba Sing Se é a capital do Reino da Terra.'],
+['Quem é o tio de Zuko?','fogo','f',['Iroh','Ozai','Zhao','Sozin'],'Iroh é conhecido como o Dragão do Oeste.'],
+['Como se chama a irmã de Zuko?','fogo','f',['Azula','Mai','Ty Lee','Katara'],'Azula é uma prodígio da dobra de fogo.'],
+['Quem é o Senhor do Fogo durante a série?','fogo','f',['Ozai','Sozin','Azulon','Zhao'],'Ozai é o pai de Zuko e Azula.'],
+['Como se chama o irmão de Katara?','agua','f',['Sokka','Aang','Zuko','Haru'],'Sokka é o estrategista do grupo.'],
+['Qual é a arma principal de Sokka?','agua','f',['Bumerangue','Arco e flecha','Leque','Lança'],'Mais tarde ele também usa uma espada de meteorito.'],
+['Quem ensina Aang a dobrar terra?','terra','f',['Toph','Katara','Suki','Azula'],'Toph sente o mundo pelas vibrações do chão.'],
+['Qual elemento Aang já domina no começo da série?','ar','f',['Ar','Água','Terra','Fogo'],'Ele precisa aprender os outros três elementos.'],
+['Quantas nações existem no mundo de Avatar?','ar','f',['Quatro','Três','Cinco','Duas'],'São as nações da Água, da Terra, do Fogo e do Ar.'],
+['Qual é a cor do fogo de Azula?','fogo','f',['Azul','Vermelho','Verde','Roxo'],'O fogo azul mostra o enorme talento dela.'],
+['Qual bebida Iroh mais ama?','terra','f',['Chá','Café','Suco','Leite'],'Iroh acha que um bom chá resolve muita coisa.'],
+['Aang é o último sobrevivente de qual povo?','ar','f',['Nômades do Ar','Tribo da Água','Reino da Terra','Nação do Fogo'],'O povo dele foi atacado pela Nação do Fogo.'],
+['Quem é a dobradora de água do grupo de Aang?','agua','f',['Katara','Toph','Azula','Mai'],'Katara também cuida e cura os amigos.'],
+['Qual príncipe quer recuperar a própria honra?','fogo','f',['Zuko','Sokka','Aang','Haru'],'No começo, Zuko persegue o Avatar.'],
+// médias
+['Qual rei governa a cidade de Omashu?','terra','m',['Bumi','Kuei','Roku','Gyatso'],'Bumi é amigo de infância de Aang.'],
+['Quem ensina Katara a dobrar água no Polo Norte?','agua','m',['Mestre Pakku','Jeong Jeong','Hama','Iroh'],'Pakku a recusa no começo por ela ser mulher.'],
+['Qual mestre de dobra de fogo abandonou o exército e odeia o fogo?','fogo','m',['Jeong Jeong','Iroh','Zhao','Ozai'],'Aang o procura para aprender a dobrar fogo.'],
+['Em qual lado do rosto fica a cicatriz de Zuko?','fogo','m',['Esquerdo','Direito','Testa','Queixo'],'Foi o próprio pai, Ozai, quem o feriu.'],
+['Onde vivem as guerreiras que usam leques e maquiagem?','terra','m',['Ilha Kyoshi','Omashu','Ba Sing Se','Gaoling'],'A ilha homenageia a Avatar Kyoshi.'],
+['Qual é o nome da amiga acrobata de Azula?','fogo','m',['Ty Lee','Mai','Suki','Yue'],'Ela bloqueia o fluxo de energia dos oponentes.'],
+['Qual amiga de Azula é calma e lança facas?','fogo','m',['Mai','Ty Lee','Katara','Suki'],'Mai quase nunca demonstra emoção.'],
+['Quem é o Rei da Terra?','terra','m',['Kuei','Bumi','Long Feng','Iroh'],'Ele reina a partir de Ba Sing Se.'],
+['Quem criou Aang no Templo do Ar do Sul?','ar','m',['Monge Gyatso','Roku','Bumi','Pakku'],'Gyatso foi o grande mestre e amigo dele.'],
+['Qual é o nome do templo onde Aang cresceu?','ar','m',['Templo do Ar do Sul','Templo do Ar do Norte','Templo do Ar do Leste','Templo do Ar do Oeste'],'Aang foi criado lá antes de desaparecer.'],
+['Qual é a polícia secreta de Ba Sing Se?','terra','m',['Dai Li','Lótus Branca','Guarda Real','Guerreiras Kyoshi'],'Os Dai Li dobram terra e obedecem a Long Feng.'],
+['Qual sociedade secreta reúne mestres de todas as nações?','fogo','m',['Lótus Branca','Dai Li','Tribo do Sol','Ordem do Fogo'],'Iroh é um de seus líderes.'],
+['Quem foram os primeiros mestres da dobra de fogo?','fogo','m',['Dragões','Leões-tartaruga','Bisões voadores','Fênix'],'Aang e Zuko aprendem isso com os dragões.'],
+['Quem mostra a dobra de sangue a Katara?','agua','m',['Hama','Pakku','Yue','Ty Lee'],'Hama passou anos presa pela Nação do Fogo.'],
+['Qual capitão persegue Aang e rivaliza com Zuko?','fogo','m',['Zhao','Jet','Haru','Long Feng'],'Zhao ataca o Espírito da Lua no Polo Norte.'],
+['Quem é o Espírito da Lua?','agua','m',['Tui','La','Koh','Wan Shi Tong'],'Tui e La vivem no Oásis dos Espíritos.'],
+['Qual espírito guarda uma enorme biblioteca no deserto?','terra','m',['Wan Shi Tong','Koh','Tui','Hei Bai'],'A coruja guarda o conhecimento do mundo.'],
+['Qual princesa da Tribo da Água do Norte se sacrifica pela Lua?','agua','m',['Yue','Katara','Azula','Ursa'],'Yue vira o novo Espírito da Lua.'],
+// difíceis
+['Qual Avatar veio imediatamente antes de Aang?','fogo','d',['Roku','Kyoshi','Kuruk','Yangchen'],'Roku era da Nação do Fogo e morreu em uma erupção.'],
+['Qual Avatar viveu cerca de 230 anos?','terra','d',['Kyoshi','Roku','Kuruk','Yangchen'],'Ela fundou as Guerreiras Kyoshi e ajudou a criar os Dai Li.'],
+['Qual jogo de tabuleiro Iroh adora?','fogo','d',['Pai Sho','Go','Xadrez','Mahjong'],'O jogo também serve de sinal entre membros da Lótus Branca.'],
+['Qual cometa fortalece a dobra de fogo?','fogo','d',['Cometa Sozin','Cometa Roku','Cometa Ozai','Cometa Azula'],'Ozai planeja usá-lo para queimar o Reino da Terra.'],
+['Como se chama a mãe de Zuko?','fogo','d',['Ursa','Hama','Yue','Kya'],'Ela foi banida por Ozai.'],
+['Qual é o sobrenome de Toph?','terra','d',['Beifong','Bumi','Kuei','Feng'],'A família dela é rica e vive em Gaoling.'],
+['Quem lidera os Dai Li no começo da série?','terra','d',['Long Feng','Kuei','Bumi','Zhao'],'Ele manipula o Rei da Terra.'],
+['Por quantos dias Iroh sitiou Ba Sing Se?','terra','d',['600 dias','100 dias','300 dias','1000 dias'],'Iroh desistiu do cerco depois de perder o filho.'],
+['Qual é o nome do filho de Iroh?','fogo','d',['Lu Ten','Zuko','Zhao','Jet'],'Iroh nunca superou essa perda.'],
+['Qual técnica Aang usa contra Ozai no final?','ar','d',['Dobra de energia','Dobra de sangue','Dobra de lava','Dobra de metal'],'Ele aprende com um leão-tartaruga.'],
+['Qual prisão da Nação do Fogo fica em uma ilha com água fervente?','fogo','d',['Rocha Fervente','Pico Negro','Ilha do Vulcão','Cratera do Dragão'],'Sokka e Zuko participam de uma fuga lá.'],
+['Qual evento tira o poder dos dobradores de fogo?','fogo','d',['Eclipse solar','Eclipse lunar','Cometa Sozin','Noite de lua cheia'],'Os heróis tentam usar o eclipse para invadir a Nação do Fogo.'],
+['Qual guerreira Kyoshi namora Sokka?','terra','d',['Suki','Mai','Yue','Ty Lee'],'Suki lidera as Guerreiras Kyoshi.'],
+['Quem derrota Azula na batalha final?','agua','d',['Katara','Zuko','Toph','Aang'],'Katara prende Azula depois da luta contra Zuko.'],
+['Qual é a idade biológica de Aang?','ar','d',['12 anos','16 anos','112 anos','10 anos'],'São 112 anos contando o tempo no gelo.'],
+['Qual é o nome da casa de chá de Iroh em Ba Sing Se?','terra','d',['Dragão de Jasmim','Lótus Dourada','Chá do Dragão','Flor de Jade'],'Iroh a abre depois de se mudar para Ba Sing Se.']
+].map(x=>({q:x[0],n:x[1],l:x[2],o:x[3],f:x[4],c:x[3][0]}));
+
+const LV={f:'fácil',m:'médio',d:'difícil'};
+// sorteio: 5 fáceis, 3 médias e 2 difíceis, em ordem aleatória
+function sorteio(){
+ const pega=(l,n)=>shuf(Q.filter(q=>q.l===l)).slice(0,n);
+ return shuf([...pega('f',5),...pega('m',3),...pega('d',2)]).map(q=>({...q,o:shuf(q.o)}));
+}
+$('sb').textContent=`A Lenda de Aang: 10 perguntas sorteadas de um banco com ${Q.length} (fáceis, médias e difíceis).`;
+
+let S={nat:null,name:'',qs:[],i:0,pts:0,ok:0,done:false,used:false,heal:false,dbl:false};
+
+// ---- fundo animado
+function setTheme(k){
+ document.body.dataset.n=k;
+ const b=$('bg');b.className=k;b.innerHTML='';
+ for(let i=0;i<16;i++){
+  const p=document.createElement('span'),s=8+Math.random()*22;
+  p.className='p';
+  if(k==='ar'){p.style.top=Math.random()*95+'%';p.style.width=s*3+'px';p.style.height='2px'}
+  else{p.style.left=Math.random()*95+'%';p.style.width=p.style.height=s+'px'}
+  p.style.animationDuration=(7+Math.random()*9)+'s';
+  p.style.animationDelay=(-Math.random()*12)+'s';
+  b.appendChild(p);
+ }
+}
+
+// ---- ranking local
+let mem=[];
+const load=()=>{try{return JSON.parse(localStorage.getItem('quizAvatarRank'))||mem}catch(e){return mem}};
+const store=l=>{mem=l;try{localStorage.setItem('quizAvatarRank',JSON.stringify(l))}catch(e){}};
+const sortG=l=>l.slice().sort((a,b)=>b.p-a.p||b.o-a.o||a.t-b.t);
+
+function show(id){document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id))}
+
+// ---- tela inicial
+$('ng').innerHTML=Object.keys(NAT).map(k=>`<button class="nb" data-k="${k}" onclick="pickN('${k}')"><span>${NAT[k].e}</span><b>${NAT[k].n}</b><small>${NAT[k].pw}</small></button>`).join('');
+function pickN(k){
+ S.nat=k;setTheme(k);
+ document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('sel',b.dataset.k===k));
+ $('pi').textContent=`Poder da ${NAT[k].n} (${NAT[k].pw}): ${NAT[k].pd}`;
+}
+setTheme('agua');
+
+function start(){
+ if(!S.nat){$('pi').textContent='Escolha uma nação para começar.';return}
+ S.name=($('nm').value.trim()||'Jogador').slice(0,14);
+ S.qs=sorteio();
+ S.i=0;S.pts=0;S.ok=0;
+ show('s1');ask();
+}
+
+// ---- perguntas
+function ask(){
+ const q=S.qs[S.i],N=NAT[S.nat],own=q.n===S.nat;
+ S.done=false;S.used=false;S.heal=false;S.dbl=false;
+ $('pg').textContent=`Pergunta ${S.i+1} de 10`;
+ $('sc').textContent=`${S.pts} pts`;
+ $('bf').style.width=(S.i/10*100)+'%';
+ $('bd').textContent=`Nível ${LV[q.l]}: ${NAT[q.n].e} pergunta da nação ${NAT[q.n].n}`+(own?' (a sua, vale 2 pontos).':'.');
+ $('qt').textContent=q.q;
+ $('op').innerHTML=q.o.map(o=>`<button class="op" onclick="pick(this)">${esc(o)}</button>`).join('');
+ $('pw').hidden=false;$('pw').disabled=false;
+ $('pw').textContent=`✨ ${N.pw}: ${N.pd}`;
+ $('fb').textContent='';$('nx').hidden=true;
+}
+const opts=()=>[...$('op').children];
+
+function lock(msg,q){
+ S.done=true;$('pw').hidden=true;
+ opts().forEach(x=>x.disabled=true);
+ $('sc').textContent=`${S.pts} pts`;
+ $('fb').innerHTML=`<b>${esc(NAT[S.nat].g)}:</b> ${esc(msg)}<br><small>💡 ${esc(q.f)}</small>`;
+ $('nx').textContent=S.i===9?'Ver resultado':'Próxima pergunta';
+ $('nx').hidden=false;
+}
+
+function pick(b){
+ if(S.done||b.disabled)return;
+ const q=S.qs[S.i],N=NAT[S.nat];
+ if(b.textContent===q.c){
+  const p=(q.n===S.nat?2:1)*(S.dbl?2:1);
+  S.pts+=p;S.ok++;b.classList.add('ok');
+  lock(`+${p} pts. ${N.r}`,q);
+ }else if(S.heal){
+  S.heal=false;b.classList.add('no');b.disabled=true;
+  $('fb').textContent='💧 A cura te deu outra chance. Tente de novo!';
+ }else{
+  b.classList.add('no');
+  opts().forEach(x=>{if(x.textContent===q.c)x.classList.add('ok')});
+  lock(N.w,q);
+ }
+}
+
+function power(){
+ if(S.done||S.used)return;
+ S.used=true;$('pw').disabled=true;
+ const q=S.qs[S.i];
+ if(S.nat==='agua'){S.heal=true;$('fb').textContent='💧 Cura ativada: se errar, você tenta de novo.'}
+ else if(S.nat==='fogo'){S.dbl=true;$('fb').textContent='🔥 Fogo duplo ativado: esta pergunta vale o dobro.'}
+ else if(S.nat==='terra'){
+  shuf(opts().filter(x=>x.textContent!==q.c)).slice(0,2).forEach(x=>{x.disabled=true;x.classList.add('off')});
+  $('fb').textContent='🪨 Duas alternativas eliminadas.';
+ }else{
+  opts().forEach(x=>{if(x.textContent===q.c)x.classList.add('ok')});
+  lock('Você planou por essa. Sem pontos e sem perdas.',q);
+ }
+}
+
+function next(){S.i++;S.i>=10?finish():ask()}
+
+function finish(){
+ const lv=S.ok>=9?['Avatar','🌟']:S.ok>=5?['Mestre de Dobra','🏅']:['Aprendiz de Dobra','🌱'];
+ const e={n:S.name,k:S.nat,p:S.pts,o:S.ok,t:Date.now()};
+ const l=load().concat(e);store(l);
+ const pos=sortG(l).findIndex(x=>x.t===e.t)+1;
+ $('rl').textContent=lv[1];
+ $('rt').textContent=`${S.name}, você é ${lv[0]}!`;
+ $('rd').innerHTML=`Nação ${NAT[S.nat].e} ${NAT[S.nat].n}<br>${S.ok} de 10 acertos, ${S.pts} pontos<br>Posição no ranking geral: ${pos}º de ${l.length}`;
+ show('s2');
+}
+
+function again(){show('s0')}
+
+// ---- ranking
+function showRank(t){
+ t=t||'g';show('s3');
+ document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.t===t));
+ const l=load(),r=$('rk');
+ if(!l.length){r.innerHTML='<p class="note">Ainda não há partidas. Jogue para entrar no ranking.</p>';return}
+ const row=(e,i)=>`<div class="row"><span>${i+1}º ${NAT[e.k].e} ${esc(e.n)}</span><b>${e.p} pts</b></div>`;
+ if(t==='g'){
+  r.innerHTML=sortG(l).slice(0,10).map(row).join('');
+ }else if(t==='n'){
+  r.innerHTML=Object.keys(NAT).map(k=>{
+   const f=sortG(l.filter(e=>e.k===k)).slice(0,3);
+   return `<h3>${NAT[k].e} ${NAT[k].n}</h3>`+(f.length?f.map(row).join(''):'<p class="note">Nenhum jogador ainda.</p>');
+  }).join('');
+ }else{
+  const d=Object.keys(NAT).map(k=>{
+   const f=l.filter(e=>e.k===k),s=f.reduce((a,e)=>a+e.p,0);
+   return{k,s,c:f.length,m:f.length?s/f.length:0};
+  }).sort((a,b)=>b.m-a.m);
+  const mx=Math.max(...d.map(x=>x.m),1);
+  r.innerHTML=d.map(x=>`<div class="row2"><div>${NAT[x.k].e} <b>${NAT[x.k].n}</b>: média de ${x.m.toFixed(1)} pts, ${x.c} partida(s), total de ${x.s}</div><div class="bar"><i style="width:${x.m/mx*100}%"></i></div></div>`).join('');
+ }
+}
+function clearRank(){if(confirm('Apagar todo o ranking deste aparelho?')){store([]);showRank()}}
+</script>
+</body>
+</html>
